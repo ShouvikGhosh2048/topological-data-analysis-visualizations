@@ -7,7 +7,11 @@ export default function Home() {
       <div className="space-y-2">
         <h2 className="text-xl">Explanations</h2>
         <ul className="list-disc pl-5">
-          <li><Link href='/explanation/homology' className="underline">Homology</Link></li>
+          <li><Link href='/explanation/homology-in-f2' className="underline">Homology in F2</Link></li>
+        </ul>
+        <h2 className="text-xl">Visualizations</h2>
+        <ul className="list-disc pl-5">
+          <li><Link href='/visualization/homology' className="underline">Homology</Link></li>
         </ul>
       </div>
     </div>
