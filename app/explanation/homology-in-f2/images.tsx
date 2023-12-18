@@ -205,37 +205,46 @@ export function HomologyExample2() {
 export function AddingBoundaryOfAnEdge() {
     return (
         <svg
-            viewBox="0 0 300 150"
-            width="300" height="150">
+            viewBox="0 0 300 180"
+            width="300" height="180">
             <Line positions={[[20, 30], [80, 30]]} />
+            <text x="47" y="50">0</text>
             <text x="95" y="33">+</text>
             <Line positions={[[120, 30], [180, 30]]} />
             <Vertex position={[120, 30]} />
             <Vertex position={[180, 30]} />
             <text x="195" y="33">=</text>
+            <text x="132" y="50">a + b</text>
             <Line positions={[[220, 30], [280, 30]]} />
             <Vertex position={[220, 30]} />
             <Vertex position={[280, 30]} />
+            <text x="232" y="50">a + b</text>
 
             <Line positions={[[20, 80], [80, 80]]} />
             <Vertex position={[20, 80]} />
+            <text x="47" y="100">a</text>
             <text x="95" y="83">+</text>
             <Line positions={[[120, 80], [180, 80]]} />
             <Vertex position={[120, 80]} />
             <Vertex position={[180, 80]} />
+            <text x="132" y="100">a + b</text>
             <text x="195" y="83">=</text>
             <Line positions={[[220, 80], [280, 80]]} />
             <Vertex position={[280, 80]} />
+            <text x="246" y="100">b</text>
 
             <Line positions={[[20, 130], [80, 130]]} />
             <Vertex position={[20, 130]} />
             <Vertex position={[80, 130]} />
+            <text x="33" y="150">a + b</text>
             <text x="95" y="133">+</text>
             <Line positions={[[120, 130], [180, 130]]} />
             <Vertex position={[120, 130]} />
             <Vertex position={[180, 130]} />
+            <text x="132" y="150">a + b</text>
             <text x="195" y="133">=</text>
             <Line positions={[[220, 130], [280, 130]]} />
+            <text x="246" y="150">0</text>
         </svg>
     )
 }
@@ -352,29 +361,34 @@ export function ExampleVertexCycleEquivalenceClass4() {
 export function AddingBoundaryOfATriangle() {
     return (
         <svg
-            viewBox="0 0 300 300"
-            width="300" height="300">
+            viewBox="0 0 300 330"
+            width="300" height="330">
             <Triangle positions={[[50, 0], [20, 50], [80, 50]]} withoutBoundary />
             <Line positions={[[50, 0], [20, 50]]} dash />
             <Line positions={[[50, 0], [80, 50]]} dash />
             <Line positions={[[20, 50], [80, 50]]} dash />
+            <text x="46" y="67">0</text>
             <text x="100" y="25">+</text>
             <Triangle positions={[[150, 0], [120, 50], [180, 50]]} />
             <Line positions={[[150, 0], [120, 50]]} color="#0369a1" strokeWidth={3} />
             <Line positions={[[150, 0], [180, 50]]} color="#0369a1" strokeWidth={3} />
             <Line positions={[[120, 50], [180, 50]]} color="#0369a1" strokeWidth={3} />
+            <text x="104" y="67">ab + bc + ca</text>
             <text x="200" y="25">=</text>
             <Triangle positions={[[250, 0], [220, 50], [280, 50]]} withoutBoundary />
             <Line positions={[[250, 0], [220, 50]]} color="#0369a1" strokeWidth={3} />
             <Line positions={[[250, 0], [280, 50]]} color="#0369a1" strokeWidth={3} />
             <Line positions={[[220, 50], [280, 50]]} color="#0369a1" strokeWidth={3} />
+            <text x="204" y="67">ab + bc + ca</text>
 
             <Triangle positions={[[50, 83], [20, 133], [80, 133]]} withoutBoundary />
             <Line positions={[[50, 83], [20, 133]]} color="#0369a1" strokeWidth={3} />
             <Line positions={[[50, 83], [80, 133]]} dash />
             <Line positions={[[20, 133], [80, 133]]} dash />
+            <text x="42" y="150">ab</text>
             <text x="100" y="108">+</text>
             <Triangle positions={[[150, 83], [120, 133], [180, 133]]} />
+            <text x="104" y="150">ab + bc + ca</text>
             <text x="200" y="108">=</text>
             <Line positions={[[150, 83], [120, 133]]} color="#0369a1" strokeWidth={3} />
             <Line positions={[[150, 83], [180, 133]]} color="#0369a1" strokeWidth={3} />
@@ -383,36 +397,43 @@ export function AddingBoundaryOfATriangle() {
             <Line positions={[[250, 83], [220, 133]]} dash />
             <Line positions={[[250, 83], [280, 133]]} color="#0369a1" strokeWidth={3} />
             <Line positions={[[220, 133], [280, 133]]} color="#0369a1" strokeWidth={3} />
+            <text x="224" y="150">bc + ca</text>
 
             <Triangle positions={[[50, 166], [20, 216], [80, 216]]} withoutBoundary />
             <Line positions={[[50, 166], [20, 216]]} dash />
             <Line positions={[[50, 166], [80, 216]]} color="#0369a1" strokeWidth={3} />
             <Line positions={[[20, 216], [80, 216]]} color="#0369a1" strokeWidth={3} />
+            <text x="25" y="233">ca + bc</text>
             <text x="100" y="191">+</text>
             <Triangle positions={[[150, 166], [120, 216], [180, 216]]} />
             <Line positions={[[150, 166], [120, 216]]} color="#0369a1" strokeWidth={3} />
             <Line positions={[[150, 166], [180, 216]]} color="#0369a1" strokeWidth={3} />
             <Line positions={[[120, 216], [180, 216]]} color="#0369a1" strokeWidth={3} />
+            <text x="104" y="233">ab + bc + ca</text>
             <text x="200" y="191">=</text>
             <Triangle positions={[[250, 166], [220, 216], [280, 216]]} withoutBoundary />
             <Line positions={[[250, 166], [220, 216]]} color="#0369a1" strokeWidth={3} />
             <Line positions={[[250, 166], [280, 216]]} dash />
             <Line positions={[[220, 216], [280, 216]]} dash />
+            <text x="242" y="233">ab</text>
 
             <Triangle positions={[[50, 249], [20, 299], [80, 299]]} withoutBoundary />
             <Line positions={[[50, 249], [20, 299]]} color="#0369a1" strokeWidth={3} />
             <Line positions={[[50, 249], [80, 299]]} color="#0369a1" strokeWidth={3} />
             <Line positions={[[20, 299], [80, 299]]} color="#0369a1" strokeWidth={3} />
+            <text x="7" y="316">ab + bc + ca</text>
             <text x="100" y="274">+</text>
             <Triangle positions={[[150, 249], [120, 299], [180, 299]]} />
             <Line positions={[[150, 249], [120, 299]]} color="#0369a1" strokeWidth={3} />
             <Line positions={[[150, 249], [180, 299]]} color="#0369a1" strokeWidth={3} />
             <Line positions={[[120, 299], [180, 299]]} color="#0369a1" strokeWidth={3} />
+            <text x="104" y="316">ab + bc + ca</text>
             <text x="200" y="274">=</text>
             <Triangle positions={[[250, 249], [220, 299], [280, 299]]} withoutBoundary />
             <Line positions={[[250, 249], [220, 299]]} dash />
             <Line positions={[[250, 249], [280, 299]]} dash />
             <Line positions={[[220, 299], [280, 299]]} dash />
+            <text x="246" y="316">0</text>
         </svg>
     )
 }

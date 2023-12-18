@@ -11,25 +11,14 @@ interface SimplicialComplexEditorProps {
     triangles: [number, number, number][],
     setTriangles: Dispatch<SetStateAction<[number, number, number][]>>,
     setView: Dispatch<SetStateAction<'editor' | 'homology'>>,
+    screenDimensions: [number, number]
 }
 
-function SimplicialComplexEditor({ vertices, setVertices, edges, setEdges, triangles, setTriangles, setView }: SimplicialComplexEditorProps) {
-    const [[screenWidth, screenHeight], setScreenDimensions] = useState<[number, number]>([0, 0]);
-    const [drag, setDrag] = useState<null | { vertexIndex: number, dragOffsetFromCenter: [number, number] }>(null);
+function SimplicialComplexEditor({ vertices, setVertices, edges, setEdges, triangles, setTriangles, setView, screenDimensions }: SimplicialComplexEditorProps) {
+    const [drag, setDrag] = useState<null | { type: 'vertex', vertexIndex: number, dragOffsetFromCenter: [number, number] } | { type: 'empty', initialPosition: [number, number] }>(null);
     const [addSimplex, setAddSimplex] = useState<null | { vertices: number[], type: 'edge' | 'triangle' }>(null);
 
-    useEffect(() => {
-        setScreenDimensions([window.innerWidth, window.innerHeight]);
-
-        function onResize() {
-            setScreenDimensions([window.innerWidth, window.innerHeight]);
-        }
-
-        window.addEventListener('resize', onResize);
-        return () => {
-            window.removeEventListener('resize', onResize);
-        };
-    }, []);
+    const [screenWidth, screenHeight] = screenDimensions;
 
     let SVGX = screenWidth - Math.floor(screenWidth * 0.75);
     let SVGY = 40; // nav height
@@ -48,20 +37,26 @@ function SimplicialComplexEditor({ vertices, setVertices, edges, setEdges, trian
             const onMove = (e: MouseEvent) => {
                 const x = e.clientX - SVGX - SVGWidth / 2;
                 const y = e.clientY - SVGY - SVGHeight / 2;
-                setVertices(vertices => ([
-                    ...vertices.slice(0, drag.vertexIndex),
-                    [x - drag.dragOffsetFromCenter[0], y - drag.dragOffsetFromCenter[1]],
-                    ...vertices.slice(drag.vertexIndex + 1)
-                ]));
+                if (drag.type === "vertex") {
+                    setVertices(vertices => ([
+                        ...vertices.slice(0, drag.vertexIndex),
+                        [x - drag.dragOffsetFromCenter[0], y - drag.dragOffsetFromCenter[1]],
+                        ...vertices.slice(drag.vertexIndex + 1)
+                    ]));
+                }
             };
             const onMouseUp = (e: MouseEvent) => {
                 const x = e.clientX - SVGX - SVGWidth / 2;
                 const y = e.clientY - SVGY - SVGHeight / 2;
-                setVertices(vertices => ([
-                    ...vertices.slice(0, drag.vertexIndex),
-                    [x - drag.dragOffsetFromCenter[0], y - drag.dragOffsetFromCenter[1]],
-                    ...vertices.slice(drag.vertexIndex + 1)
-                ]));
+                if (drag.type === "vertex") {
+                    setVertices(vertices => ([
+                        ...vertices.slice(0, drag.vertexIndex),
+                        [x - drag.dragOffsetFromCenter[0], y - drag.dragOffsetFromCenter[1]],
+                        ...vertices.slice(drag.vertexIndex + 1)
+                    ]));
+                } else if (Math.pow(x - drag.initialPosition[0], 2) + Math.pow(y - drag.initialPosition[1], 2) <= 25){
+                    setVertices(vertices => [...vertices, drag.initialPosition]);
+                }
                 setDrag(null);
             };
 
@@ -74,31 +69,48 @@ function SimplicialComplexEditor({ vertices, setVertices, edges, setEdges, trian
         }
     }, [drag, SVGX, SVGY, SVGHeight, SVGWidth, screenWidth, screenHeight, setVertices]);
 
+    // Let screenHeight be set before showing anything.
+    if (screenHeight === 0) {
+        return <div></div>;
+    }
+
     // https://stackoverflow.com/a/4407335
     return (
         <div className="flex-grow flex flex-col-reverse justify-end sm:flex-row sm:justify-start h-full overflow-hidden">
             <div className="w-full sm:w-3/12 p-3 border-r-2 space-y-2 max-h-full overflow-auto">
-                {!addSimplex && (<div className="flex flex-wrap gap-2">
-                    {vertices.length >= 1 && <button className="bg-gray-200 p-1 rounded" onClick={() => {
-                        setView('homology');
-                    }}>View homology</button>}
-                    {vertices.length >= 2 && <button className="bg-gray-200 p-1 rounded" onClick={() => {
-                        setDrag(null);
-                        setAddSimplex({
-                            vertices: [],
-                            type: 'edge',
-                        });
-                    }}>Add edge</button>}
-                    {vertices.length >= 3 && <button className="bg-gray-200 p-1 rounded" onClick={() => {
-                        setDrag(null);
-                        setAddSimplex({
-                            vertices: [],
-                            type: 'triangle',
-                        });
-                    }}>Add triangle</button>}
+                {!addSimplex && (<div className="space-y-2">
+                    <div>
+                        {vertices.length >= 1 && <button className="bg-gray-200 p-1 rounded" onClick={() => {
+                            setDrag(null);
+                            setVertices([]);
+                            setEdges([]);
+                            setTriangles([]);
+                        }}>Reset</button>}
+                    </div>
+                    <div>
+                        {vertices.length >= 1 && <button className="bg-gray-200 p-1 rounded" onClick={() => {
+                            setView('homology');
+                        }}>View homology</button>}
+                    </div>
+                    <div className="flex gap-2 flex-wrap">
+                        {vertices.length >= 2 && <button className="bg-gray-200 p-1 rounded" onClick={() => {
+                            setDrag(null);
+                            setAddSimplex({
+                                vertices: [],
+                                type: 'edge',
+                            });
+                        }}>Add edge</button>}
+                        {vertices.length >= 3 && <button className="bg-gray-200 p-1 rounded" onClick={() => {
+                            setDrag(null);
+                            setAddSimplex({
+                                vertices: [],
+                                type: 'triangle',
+                            });
+                        }}>Add triangle</button>}
+                    </div>
                 </div>)}
                 {addSimplex && (
-                    <div className="flex flex-wrap gap-2">
+                    <div className="flex flex-wrap gap-2 items-center">
                         <span>Creating {addSimplex.type}</span>
                         <button className="bg-gray-200 p-1 rounded" onClick={() => {
                             setAddSimplex(null);
@@ -109,7 +121,7 @@ function SimplicialComplexEditor({ vertices, setVertices, edges, setEdges, trian
                 <div>
                     {vertices.map((_, i) => (
                         <div key={i} className="flex justify-between">
-                            <span>Vertex {i + 1}</span>
+                            <span>{i + 1}</span>
                             {!addSimplex && (<button onClick={() => {
                                 setDrag(null);
                                 setVertices([...vertices.slice(0, i), ...vertices.slice(i + 1)]);
@@ -123,7 +135,7 @@ function SimplicialComplexEditor({ vertices, setVertices, edges, setEdges, trian
                 <div>
                     {edges.map((edge, i) => (
                         <div key={i} className="flex justify-between">
-                            <span>Edge {JSON.stringify(edge.map(vertex => vertex + 1))}</span>
+                            <span>{JSON.stringify(edge.map(vertex => vertex + 1))}</span>
                             {!addSimplex && (<button onClick={() => {
                                 setDrag(null);
                                 setEdges([...edges.slice(0, i), ...edges.slice(i + 1)]);
@@ -136,7 +148,7 @@ function SimplicialComplexEditor({ vertices, setVertices, edges, setEdges, trian
                 <div>
                     {triangles.map((triangle, i) => (
                         <div key={i} className="flex justify-between">
-                            <span>Triangle {JSON.stringify(triangle.map(vertex => vertex + 1))}</span>
+                            <span>{JSON.stringify(triangle.map(vertex => vertex + 1))}</span>
                             {!addSimplex && (<button onClick={() => {
                                 setDrag(null);
                                 setTriangles([...triangles.slice(0, i), ...triangles.slice(i + 1)]);
@@ -151,15 +163,14 @@ function SimplicialComplexEditor({ vertices, setVertices, edges, setEdges, trian
                         if (!drag && !addSimplex) {
                             const x = e.clientX - SVGX - SVGWidth / 2;
                             const y = e.clientY - SVGY - SVGHeight / 2;
-                            setDrag({ vertexIndex: vertices.length, dragOffsetFromCenter: [0, 0] });
-                            setVertices([...vertices, [x, y]]);
+                            setDrag({ type: 'empty', initialPosition: [x, y] });
                         }
                     }}>
                     {vertices.length === 0 && <text fontFamily="monospace" fontSize="30" x="-82" className="select-none">Click here</text>}
                     {triangles.map((triangle, i) => <polygon key={i} points={`${vertices[triangle[0]][0]},${vertices[triangle[0]][1]}, ${vertices[triangle[1]][0]},${vertices[triangle[1]][1]}, ${vertices[triangle[2]][0]},${vertices[triangle[2]][1]}`} fill="rgb(200,200,200)" fillOpacity={addSimplex ? 0.3 : 1.0} />)}
                     {edges.map((edge, i) => <line key={i} x1={vertices[edge[0]][0]} y1={vertices[edge[0]][1]} x2={vertices[edge[1]][0]} y2={vertices[edge[1]][1]} stroke="black" strokeOpacity={addSimplex ? 0.3 : 1.0} strokeWidth={3} />)}
                     {vertices.map((vertex, i) => (
-                        <g key={i}
+                        <g key={i} className="cursor-pointer"
                             onMouseDown={(e) => {
                                 e.stopPropagation();
                                 if (addSimplex) {
@@ -209,13 +220,12 @@ function SimplicialComplexEditor({ vertices, setVertices, edges, setEdges, trian
                                     const x = e.clientX - SVGX - SVGWidth / 2;
                                     const y = e.clientY - SVGY - SVGHeight / 2;
                                     const dragOffsetFromCenter: [number, number] = [x - vertex[0], y - vertex[1]];
-                                    setDrag({ vertexIndex: i, dragOffsetFromCenter });
+                                    setDrag({ type: 'vertex', vertexIndex: i, dragOffsetFromCenter });
                                 }
                             }}>
                             <circle cx={vertex[0]} cy={vertex[1]} r="20"
                                 fill="white" stroke="black" strokeWidth="3"
-                                strokeOpacity={addSimplex ? (addSimplex.vertices.includes(i) ? 1.0 : 0.3) : 1.0}
-                                className="cursor-pointer" />
+                                strokeOpacity={addSimplex ? (addSimplex.vertices.includes(i) ? 1.0 : 0.3) : 1.0} />
                             <text x={vertex[0] - 5 * Math.floor(1 + Math.log10(i + 1))} y={vertex[1] + 5}
                                 fontFamily="monospace" fontSize="20" className="select-none"
                                 fillOpacity={addSimplex ? (addSimplex.vertices.includes(i) ? 1.0 : 0.3) : 1.0} >{i + 1}</text>
@@ -330,7 +340,7 @@ function HomologyViewer({ vertices, edges, triangles, setView }: HomologyViewerP
         )),
     ];
     // Columns of BZ0 after the first B0 columns.
-    const H0Columns = [...applyUniqueLastTransformation(BZ0)].filter(i => i >= edgeBoundaryNonZeroColumnIndices.size);
+    const nonZeroH0Columns = [...applyUniqueLastTransformation(BZ0)].filter(i => i >= edgeBoundaryNonZeroColumnIndices.size);
     // Columns of B1 followed by columns of Z1.
     const BZ1 = [
         ...[...triangleBoundaryNonZeroColumnIndices].map(column => ({
@@ -345,30 +355,43 @@ function HomologyViewer({ vertices, edges, triangles, setView }: HomologyViewerP
     // Columns of BZ1 after the first B1 columns.
     const nonZeroH1Columns = [...applyUniqueLastTransformation(BZ1)].filter(i => i >= triangleBoundaryNonZeroColumnIndices.size);
 
-    let maxCoordinate = 0;
+    let minX = vertices[0][0];
+    let maxX = vertices[0][0];
+    let minY = vertices[0][1];
+    let maxY = vertices[0][1];
     vertices.forEach(vertex => {
-        maxCoordinate = Math.max(maxCoordinate, Math.abs(vertex[0]), Math.abs(vertex[1]));
+        minX = Math.min(minX, vertex[0]);
+        maxX = Math.max(maxX, vertex[0]);
+        minY = Math.min(minY, vertex[1]);
+        maxY = Math.max(maxY, vertex[1]);
     });
-    const svgViewBox = `${- maxCoordinate - 25} ${- maxCoordinate - 25} ${2 * (maxCoordinate + 25)} ${2 * (maxCoordinate + 25)}`;
+    const vertexRadius = 12;
+    const cx = (minX + maxX) / 2;
+    const cy = (minY + maxY) / 2;
+    const w = Math.max(300, maxX - minX + 3 * vertexRadius);
+    const h = Math.max(300, maxY - minY + 3 * vertexRadius);
+    const svgViewBox = `${cx - w / 2} ${cy - h / 2} ${w} ${h}`;
 
-    const trianglePolygons = (
-        triangles.map((triangle, i) => 
-            <polygon key={i}
-                points={`${vertices[triangle[0]][0]},${vertices[triangle[0]][1]}, ${vertices[triangle[1]][0]},${vertices[triangle[1]][1]}, ${vertices[triangle[2]][0]},${vertices[triangle[2]][1]}`}
-                fill="rgb(200,200,200)" />)
-    );
-    const edgesLines = (
-        edges.map((edge, i) => 
-            <line key={i}
-                x1={vertices[edge[0]][0]} y1={vertices[edge[0]][1]} x2={vertices[edge[1]][0]} y2={vertices[edge[1]][1]}
-                stroke="black" strokeWidth={3} />)
-    );
-    const vertexCircles = (
-        vertices.map((vertex, i) => <circle key={i} cx={vertex[0]} cy={vertex[1]} r="5" />)
+    const simplices = (
+        <>
+            {triangles.map((triangle, i) =>
+                <polygon key={i}
+                    points={`${vertices[triangle[0]][0]},${vertices[triangle[0]][1]}, ${vertices[triangle[1]][0]},${vertices[triangle[1]][1]}, ${vertices[triangle[2]][0]},${vertices[triangle[2]][1]}`}
+                    fill="rgb(200,200,200)" />)}
+            {
+                edges.map((edge, i) =>
+                    <line key={i}
+                        x1={vertices[edge[0]][0]} y1={vertices[edge[0]][1]} x2={vertices[edge[1]][0]} y2={vertices[edge[1]][1]}
+                        stroke="black" strokeWidth={vertexRadius / 2} />)
+            }
+            {
+                vertices.map((vertex, i) => <circle key={i} cx={vertex[0]} cy={vertex[1]} r={vertexRadius} />)
+            }
+        </>
     );
 
     return (
-        <div className="max-w-2xl p-5 flex-grow">
+        <div className="p-5 flex-grow space-y-5">
             <div>
                 <button className="bg-gray-200 p-1 rounded" onClick={() => {
                     setView('editor');
@@ -379,114 +402,117 @@ function HomologyViewer({ vertices, edges, triangles, setView }: HomologyViewerP
                 viewBox={svgViewBox}
                 width="300"
             >
-                {trianglePolygons}
-                {edgesLines}
-                {vertices.map((vertex, i) => (
-                    <g key={i}>
-                        <circle cx={vertex[0]} cy={vertex[1]} r="20"
-                            fill="white" stroke="black" strokeWidth="3"
-                            className="cursor-pointer" />
-                        <text x={vertex[0] - 5 * Math.floor(1 + Math.log10(i + 1))} y={vertex[1] + 5}
-                            fontFamily="monospace" fontSize="20" className="select-none">{i + 1}</text>
-                    </g>
-                ))}
+                {simplices}
             </svg>
-            <p className="text-xl">Z0</p>
-            <div className="flex flex-wrap gap-2">
-                {vertices.map((vertex, i) => (
-                    <svg viewBox={svgViewBox} key={i} width="300" height="300">
-                        <g fillOpacity={0.5} strokeOpacity={0.5}>
-                            {trianglePolygons}
-                            {edgesLines}
-                            {vertexCircles}
-                        </g>
-                        <circle cx={vertex[0]} cy={vertex[1]} r="10"/>
-                    </svg>
-                ))}
+            <div>
+                <p className="text-xl">A basis for Z<sub>0</sub></p>
+                <div className="flex flex-wrap gap-2">
+                    {vertices.map((vertex, i) => (
+                        <svg viewBox={svgViewBox} key={i} width="300" height="300" className="border border-slate-500 rounded">
+                            <g opacity={0.5}>
+                                {simplices}
+                            </g>
+                            <circle cx={vertex[0]} cy={vertex[1]} r={vertexRadius} />
+                        </svg>
+                    ))}
+                    {vertices.length === 0 && <p>Empty basis</p>}
+                </div>
             </div>
-            <p className="text-xl">B0</p>
-            <div className="flex flex-wrap gap-2">
-                {[...edgeBoundaryNonZeroColumnIndices].map(column => (
-                    <svg viewBox={svgViewBox} key={column} width="300" height="300">
-                        <g fillOpacity={0.5} strokeOpacity={0.5}>
-                            {trianglePolygons}
-                            {edgesLines}
-                            {vertexCircles}
-                        </g>
-                        {[...edgeBoundaryMatrix[column].entries].map(vertexIndex => (
-                            <circle cx={vertices[vertexIndex][0]} cy={vertices[vertexIndex][1]} r="10" key={vertexIndex} />
-                        ))}
-                    </svg>
-                ))}
+            <div>
+                <p className="text-xl">A basis for B<sub>0</sub></p>
+                <div className="flex flex-wrap gap-2">
+                    {[...edgeBoundaryNonZeroColumnIndices].map(column => (
+                        <svg viewBox={svgViewBox} key={column} width="300" height="300" className="border border-slate-500 rounded">
+                            <g opacity={0.5}>
+                                {simplices}
+                            </g>
+                            {[...edgeBoundaryMatrix[column].entries].map(vertexIndex => (
+                                <circle cx={vertices[vertexIndex][0]} cy={vertices[vertexIndex][1]} r={vertexRadius} key={vertexIndex} />
+                            ))}
+                        </svg>
+                    ))}
+                    {edgeBoundaryNonZeroColumnIndices.size === 0 && <p>Empty basis</p>}
+                </div>
             </div>
-            <p className="text-xl">H0</p>
-            <div className="flex flex-wrap gap-2">
-                {[...H0Columns].map(column => (
-                    <svg viewBox={svgViewBox} key={column} width="300" height="300">
-                        <g fillOpacity={0.5} strokeOpacity={0.5}>
-                            {trianglePolygons}
-                            {edgesLines}
-                            {vertexCircles}
-                        </g>
-                        {[...BZ0[column].entries].map(vertexIndex => (
-                            <circle cx={vertices[vertexIndex][0]} cy={vertices[vertexIndex][1]} r="10" key={vertexIndex} />
-                        ))}
-                    </svg>
-                ))}
+            <div>
+                <p className="text-xl">A basis for H<sub>0</sub></p>
+                <div className="flex flex-wrap gap-2">
+                    {[...nonZeroH0Columns].map(column => (
+                        <svg viewBox={svgViewBox} key={column} width="300" height="300" className="border border-slate-500 rounded">
+                            <g opacity={0.5}>
+                                {simplices}
+                            </g>
+                            {[...BZ0[column].entries].map(vertexIndex => (
+                                <circle cx={vertices[vertexIndex][0]} cy={vertices[vertexIndex][1]} r={vertexRadius} key={vertexIndex} />
+                            ))}
+                        </svg>
+                    ))}
+                    {nonZeroH0Columns.length === 0 && <p>Empty basis</p>}
+                </div>
             </div>
-            <p className="text-xl">Z1</p>
-            <div className="flex flex-wrap gap-2">
-                {edgeBoundaryZeroColumnIndices.map(column => (
-                    <svg viewBox={svgViewBox} key={column} width="300" height="300">
-                        <g fillOpacity={0.5} strokeOpacity={0.5}>
-                            {trianglePolygons}
-                            {edgesLines}
-                            {vertexCircles}
-                        </g>
-                        {[...edgeBoundaryMatrix[column].label].map(edgeIndex => (
-                            <line x1={vertices[edges[edgeIndex][0]][0]} y1={vertices[edges[edgeIndex][0]][1]}
-                                x2={vertices[edges[edgeIndex][1]][0]} y2={vertices[edges[edgeIndex][1]][1]}
-                                strokeWidth={3} stroke="black"
-                                key={edgeIndex} />
-                        ))}
-                    </svg>
-                ))}
+            <p className="font-bold">β<sub>0</sub> = {nonZeroH0Columns.length}</p>
+            <div>
+                <p className="text-xl">A basis for Z<sub>1</sub></p>
+                <div className="flex flex-wrap gap-2">
+                    {edgeBoundaryZeroColumnIndices.map(column => (
+                        <svg viewBox={svgViewBox} key={column} width="300" height="300" className="border border-slate-500 rounded">
+                            <g opacity={0.5}>
+                                {simplices}
+                            </g>
+                            {[...edgeBoundaryMatrix[column].label].map(edgeIndex => (
+                                <line x1={vertices[edges[edgeIndex][0]][0]} y1={vertices[edges[edgeIndex][0]][1]}
+                                    x2={vertices[edges[edgeIndex][1]][0]} y2={vertices[edges[edgeIndex][1]][1]}
+                                    strokeWidth={vertexRadius / 2} stroke="black"
+                                    key={edgeIndex} />
+                            ))}
+                        </svg>
+                    ))}
+                    {edgeBoundaryZeroColumnIndices.length === 0 && <p>Empty basis</p>}
+                </div>
             </div>
-            <p className="text-xl">B1</p>
-            <div className="flex flex-wrap gap-2">
-                {[...triangleBoundaryNonZeroColumnIndices].map(column => (
-                    <svg viewBox={svgViewBox} key={column} width="300" height="300">
-                        <g fillOpacity={0.5} strokeOpacity={0.5}>
-                            {trianglePolygons}
-                            {edgesLines}
-                            {vertexCircles}
-                        </g>
-                        {[...triangleBoundaryMatrix[column].entries].map(edgeIndex => (
-                            <line x1={vertices[edges[edgeIndex][0]][0]} y1={vertices[edges[edgeIndex][0]][1]}
-                                x2={vertices[edges[edgeIndex][1]][0]} y2={vertices[edges[edgeIndex][1]][1]}
-                                strokeWidth={3} stroke="black"
-                                key={edgeIndex} />
-                        ))}
-                    </svg>
-                ))}
+            <div>
+                <p className="text-xl">A basis for B<sub>1</sub></p>
+                <div className="flex flex-wrap gap-2">
+                    {[...triangleBoundaryNonZeroColumnIndices].map(column => (
+                        <svg viewBox={svgViewBox} key={column} width="300" height="300" className="border border-slate-500 rounded">
+                            <g opacity={0.5}>
+                                {simplices}
+                            </g>
+                            {[...triangleBoundaryMatrix[column].entries].map(edgeIndex => (
+                                <line x1={vertices[edges[edgeIndex][0]][0]} y1={vertices[edges[edgeIndex][0]][1]}
+                                    x2={vertices[edges[edgeIndex][1]][0]} y2={vertices[edges[edgeIndex][1]][1]}
+                                    strokeWidth={vertexRadius / 2} stroke="black"
+                                    key={edgeIndex} />
+                            ))}
+                        </svg>
+                    ))}
+                    {triangleBoundaryNonZeroColumnIndices.size === 0 && <p>Empty basis</p>}
+                </div>
             </div>
-            <p className="text-xl">H1</p>
-            <div className="flex flex-wrap gap-2">
-                {[...nonZeroH1Columns].map(column => (
-                    <svg viewBox={svgViewBox} key={column} width="300" height="300">
-                        <g fillOpacity={0.5} strokeOpacity={0.5}>
-                            {trianglePolygons}
-                            {edgesLines}
-                            {vertexCircles}
-                        </g>
-                        {[...BZ1[column].entries].map(edgeIndex => (
-                            <line x1={vertices[edges[edgeIndex][0]][0]} y1={vertices[edges[edgeIndex][0]][1]}
-                                x2={vertices[edges[edgeIndex][1]][0]} y2={vertices[edges[edgeIndex][1]][1]}
-                                strokeWidth={3} stroke="black"
-                                key={edgeIndex} />
-                        ))}
-                    </svg>
-                ))}
+            <div>
+                <p className="text-xl">A basis for H<sub>1</sub></p>
+                <div className="flex flex-wrap gap-2">
+                    {[...nonZeroH1Columns].map(column => (
+                        <svg viewBox={svgViewBox} key={column} width="300" height="300" className="border border-slate-500 rounded">
+                            <g opacity={0.5}>
+                                {simplices}
+                            </g>
+                            {[...BZ1[column].entries].map(edgeIndex => (
+                                <line x1={vertices[edges[edgeIndex][0]][0]} y1={vertices[edges[edgeIndex][0]][1]}
+                                    x2={vertices[edges[edgeIndex][1]][0]} y2={vertices[edges[edgeIndex][1]][1]}
+                                    strokeWidth={vertexRadius / 2} stroke="black"
+                                    key={edgeIndex} />
+                            ))}
+                        </svg>
+                    ))}
+                    {nonZeroH1Columns.length === 0 && <p>Empty basis</p>}
+                </div>
+            </div>
+            <p className="font-bold">β<sub>1</sub> = {nonZeroH1Columns.length}</p>
+            <div>
+                <button className="bg-gray-200 p-1 rounded" onClick={() => {
+                    setView('editor');
+                }}>Back to editor</button>
             </div>
         </div>
     );
@@ -501,12 +527,27 @@ export default function Homology() {
 
     const [view, setView] = useState<'editor' | 'homology'>('editor');
 
+    const [screenDimensions, setScreenDimensions] = useState<[number, number]>([0, 0]);
+
+    useEffect(() => {
+        setScreenDimensions([window.innerWidth, window.innerHeight]);
+
+        function onResize() {
+            setScreenDimensions([window.innerWidth, window.innerHeight]);
+        }
+
+        window.addEventListener('resize', onResize);
+        return () => {
+            window.removeEventListener('resize', onResize);
+        };
+    }, []);
+
     if (view === 'editor') {
         return (
             <SimplicialComplexEditor vertices={vertices} setVertices={setVertices}
                 edges={edges} setEdges={setEdges}
                 triangles={triangles} setTriangles={setTriangles}
-                setView={setView} />
+                setView={setView} screenDimensions={screenDimensions}/>
         );
     } else {
         return (

@@ -35,6 +35,11 @@ import {
     HomologyCalculationTriangleBoundaryMatrix,
 } from './images.tsx';
 
+import {
+    EdgeEquivalenceTransformations,
+    TriangleEquivalenceTransformations,
+} from './equivalenceTransformations.tsx';
+
 export const metadata = {
     title: 'Homology'
 }
@@ -46,7 +51,7 @@ A **n-simplex** is a n-dimensional triangle.
 
 <SimplexDefinition />
 
-For a simplex S, any simplex S' formed by a subset of the vertices of S is called a **face** of S.
+For a simplex S, any simplex S' formed by a non-empty subset of the vertices of S is called a **face** of S.
 
 Example: In a 2-simplex (a triangle), the vertices and edges form the faces.
 
@@ -61,9 +66,8 @@ Example:
 <GeometricSimplicialComplex />
 
 An **[abstract simplicial complex](https://en.wikipedia.org/wiki/Abstract_simplicial_complex)** is a set S of non-empty finite sets such that for any T in S, all non empty subsets of T lie in S.
-(This condition is similar to the condition that for any simplex in a geometric simplicial complex, all its faces must also be in the simplicial complex.)
 
-Example: \{\{a\}, \{b\}, \{c\}, \{d\}, \{a, b\}, \{b, c\}, \{c, d\}, \{d, a\}, \{b, c, d\}\}
+Example: \{\{a\}, \{b\}, \{c\}, \{d\}, \{a, b\}, \{b, c\}, \{c, d\}, \{d, a\}, \{b, d\}, \{b, c, d\}\}
 
 Any geometric simplicial complex can be converted to an abstract simplicial complex by mapping each simplex to the set of its vertices.
 
@@ -83,11 +87,11 @@ We can consider "expressions" like a - 2c and 3f + 5e.
 There isn't any predefined notion of addition of vertices, we just write out expressions as if we could add vertices.
 Such expressions are known as **[formal sums](https://en.wikipedia.org/wiki/Formal_sum)**.
 
-In general, for any dimension d, we can consider formal sums of d-simplices. This set is denoted by C<sub>d</sub>.
+In general, for any dimension d, we can consider formal sums of the d-simplices of a simplicial complex S. This set is denoted by C<sub>d</sub> (note that C<sub>d</sub> depends on S).
 
 Generally while studying homology we consider formal sums with integer coefficients. However, for the following explanation (and other explanations on this website),
 we will consider formal sums with coefficients from **F<sub>2</sub>**, the set \{0, 1\} with addition and multiplication mod 2.
-An important observation is that this means that for any simplex s, s + s = 0 (as 1 + 1 = 0 mod 2).
+A important result of this is that for any simplex s, s + s = (1 + 1) * s = 0 * s = 0.
 
 Since F<sub>2</sub> is a field, C<sub>d</sub> is a vector space.
 
@@ -115,16 +119,25 @@ We will denote the boundary function on formal sums of p-simplices by d<sub>p</s
 ### 2.3. Cycles and boundaries
 <HomologyExample2 />
 
-Consider the formal sum de + ef + fd (purple edges). This formal sum has boundary 0.
-Such formal sums are known as cycles.
+Consider the formal sum de + ef + fd (purple edges).
 
-Formally, the set of p-cycles **Z<sub>p</sub> = kernel of d<sub>p</sub>**. (The kernel of a map is the set of elements that get mapped to 0.)
-Thus bd + dc + cb is a 1-cycle.
+Boundary of (de + ef + fd)
 
-Now consider the formal sum fg + gh + hf (blue edges). This formal sum is the boundary of fgh (a formal sum with one simplex).
+= (d + e + e + f + f + d)
+
+= (d + d) + (e + e) + (f + f)
+
+= 0
+
+Thus de + ef + fd has boundary 0. Such formal sums are known as cycles.
+
+Formally, for a simplicial complex S, the set of p-cycles **Z<sub>p</sub> = kernel of d<sub>p</sub>**. (The kernel of a map is the set of elements that get mapped to 0.)
+Thus de + ef + fd is a 1-cycle.
+
+Now consider the formal sum fg + gh + hf (blue edges). This formal sum is the boundary of fgh.
 Such formal sums are know as boundaries (they are a boundary of some formal sum).
 
-Formally, the set of p-boundaries **B<sub>p</sub> = image of d<sub>p+1</sub>** (note the p + 1).
+Formally, for a simplicial complex S, the set of p-boundaries **B<sub>p</sub> = image of d<sub>p+1</sub>** (note the p + 1).
 Thus fg + gh + hf is a 1-boundary.
 
 Z<sub>p</sub> and B<sub>p</sub> are vector spaces (note that this is for coefficients in F<sub>2</sub>).
@@ -143,7 +156,7 @@ be the simplex formed by the vertices V - \{a\}, V - \{b\} and V - \{a, b\} resp
 
 Then d<sub>n+1</sub>(S) = ... + S<sub>a</sub> + ... + S<sub>b</sub> + ...
 
-And d<sub>n</sub>(d<sub>n</sub>(S)) = ... + d<sub>n-1</sub>(S<sub>a</sub>) + ... + d<sub>n-1</sub>(S<sub>a</sub>) + ...
+And d<sub>n</sub>(d<sub>n+1</sub>(S)) = ... + d<sub>n</sub>(S<sub>a</sub>) + ... + d<sub>n</sub>(S<sub>b</sub>) + ...
 
 = ... + (... + S<sub>a,b</sub> + ...) + ... + (... + S<sub>a,b</sub> + ...) + ...
 
@@ -163,7 +176,7 @@ Thus we can consider the homology group **H<sub>n</sub> = Z<sub>n</sub> / B<sub>
 
 What is H<sub>n</sub>?
 
-Z<sub>n</sub> / B<sub>n</sub> means that we take the elements of Z<sub>n</sub>, define the equivalence relation a ~ b iff b - a in B<sub>n</sub> on it, and consider its equivalence classes as a group.
+Z<sub>n</sub> / B<sub>n</sub> means that we take the elements of Z<sub>n</sub>, define the equivalence relation a ~ b iff b - a in B<sub>n</sub>, and consider the equivalence classes as a group.
 
 Thus a ~ b iff b - a is a boundary.
 
@@ -182,11 +195,11 @@ There are 3 distinct cases, depending on how many vertices of the boundary are a
 <AddingBoundaryOfAnEdge />
 
 - The first case and third case imply that we can freely add and remove two adjacent vertices from the formal sum under the equivalence.
-- The second case implies that we can replace a vertex with adjacent vertex.
+- The second case implies that we can replace a vertex with a adjacent vertex.
 
-Thus two formal sums are equivalent iff you can go from one to other using these transformations.
+Thus two formal sums are equivalent iff you can go from one to the other using these transformations.
 
-Example (we only show the vertices in the sum):
+Example:
 <HomologyExampleVertexCycleTransformation1 />
 We replace h with f.
 <HomologyExampleVertexCycleTransformation2 />
@@ -194,6 +207,9 @@ We remove e + f.
 <HomologyExampleVertexCycleTransformation3 />
 
 All formal sums within this path are equivalent.
+
+You can try the moves here:
+<EdgeEquivalenceTransformations />
 
 What are the H<sub>0</sub> equivalence classes of this simplicial complex?
 This simplicial complex will have 4 equivalence classes with representatives:
@@ -222,7 +238,7 @@ There are 4 distinct cases, depending on how many edges of the boundary are alre
 - The first case and fourth case imply that we can freely add and remove the boundary of a triangle from the formal sum under the equivalence.
 - The second and third case imply that we can replace an edge with the other two edges and back.
 
-Thus two formal sums are equivalent iff you can go from one to other using these transformations.
+Thus two formal sums are equivalent iff you can go from one to the other using these transformations.
 
 Example:
 <HomologyExample3 />
@@ -234,6 +250,9 @@ We replace eg + fg with ef.
 <HomologyExample6 />
 
 All formal sums within this path are equivalent.
+
+You can try the moves here:
+<TriangleEquivalenceTransformations />
 
 What are the H<sub>1</sub> equivalence classes of this simplicial complex?
 This simplicial complex will have 4 equivalence classes with representatives:
@@ -251,7 +270,7 @@ Thus the individual equivalence classes capture the different combinations of ho
 
 ### 2.8. General case
 
-In the general case - H<sub>n</sub> is a vector space
+We can generalize this for n>1. H<sub>n</sub> is a vector space
 and its dimension is the number of "n dimensional holes" in the simplicial complex.
 
 The dimension of H<sub>n</sub> for a simplicial complex is known as its **Betti number β<sub>n</sub>**.
@@ -278,7 +297,7 @@ We will perform the following algorithm on it:
 - We go through the columns from left to right.
 - For each column c, if it is non-zero, we find last(c) - the position of the last 1
 in the column. If any column c' to the left of c has the same last as c, we add c' to c.
-We repeat this check and add till either c becomes 0, or c gets a distinct last.
+We repeat this check-and-add till either c becomes 0, or c gets a distinct last.
 
 So we start with:
 
@@ -319,9 +338,9 @@ Now we can make the following observations:
 This comes from the fact that the boundary function is linear.
 - The non-zero columns are linearly independent. This comes from the fact that all columns
 have distinct lasts.
-- The formal sums on top of the columns form a basis of Z<sub>n</sub> (for the corresponding n).
-(Any change to the formal sums preserves the number of formal sums and their span. They start as a basis,
-and so stay as a basis.)
+- The formal sums on top of the columns form a basis of C<sub>1</sub>.
+(The changes to the formal sums preserve the number of formal sums and their span. They start as a basis,
+and so at the end we have a spanning set of C<sub>1</sub> with dim(C<sub>1</sub>) vectors. Hence it is a basis.)
 
 Because of this we get:
 - The formal sums on top of the zero columns have zero boundary. They form a basis of the kernel of boundary function d<sub>1</sub>, that is, a basis of Z<sub>1</sub>.
@@ -329,12 +348,10 @@ Because of this we get:
 
 This algorithm works similarly for higher dimensions. Thus we can use it to calculate Z<sub>n</sub> and B<sub>n</sub>.
 
-If we want to calculate the Betti number, we can just use β<sub>n</sub> = dim(H<sub>n</sub>) = dim(Z<sub>n</sub>/B<sub>n</sub>) = dim(Z<sub>n</sub>) - dim(B<sub>n</sub>).
+If we want to calculate a basis of H<sub>n</sub>, we calculate a basis for B<sub>n</sub> and Z<sub>n</sub> using the previous algorithm.
+We then take those two and concatenate them into a single matrix (B<sub>n</sub> on the left). Then we repeat the same algorithm as above.
 
-If we actually want to calculate a basis of H<sub>n</sub>, we can calculate a basis for B<sub>n</sub> and H<sub>n</sub> using the previous algorithm.
-We then take those two and concatenate them into a single matrix (B<sub>n</sub>s basis on the left). Then we repeat the same algorithm as above.
-
-B<sub>n</sub>s basis will remain unchanged. The remaining non-zero columns to the right are representative of equivalence classes, and those corresponding equivalence classes form a basis of H<sub>n</sub>.
+B<sub>n</sub>s basis will remain unchanged. The remaining non-zero columns to the right are representatives of equivalence classes, and those corresponding equivalence classes form a basis of H<sub>n</sub>.
 
 For example, in the previous example we got:
 <HomologyCalculationMatrix7 />
@@ -350,6 +367,9 @@ Which after applying the algorithm gets converted to:
 <HomologyCalculationMatrix9 />
 
 Thus we get a single basis element for H<sub>1</sub> - the equivalence class corresponding to e<sub>1</sub> + e<sub>2</sub> + e<sub>3</sub>.
+
+(Note: If we just want to calculate the Betti number, we can use β<sub>n</sub> = dim(H<sub>n</sub>) = dim(Z<sub>n</sub>/B<sub>n</sub>) = dim(Z<sub>n</sub>) - dim(B<sub>n</sub>).
+Then we don't need to calculate a basis of the homology group.)
 
 ## Resources
 - [Wikipedia](https://en.wikipedia.org/wiki/Homology_(mathematics))
