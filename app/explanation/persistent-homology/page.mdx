@@ -1,0 +1,54 @@
+import {
+    ExamplePointsSVG,
+    ExampleVietorisRipsSVG,
+    ExampleDifferentVietorisRips,
+} from './images.tsx';
+
+export const metadata = {
+    title: 'Persistent Homology'
+}
+
+# Persistent Homology
+
+Consider the following collection of points.
+
+<ExamplePointsSVG/>
+
+Intuitively these points represent a shape with two holes.
+However if we simply calculate β<sub>1</sub> for this simplicial complex,
+we get β<sub>1</sub> = 0 (as there are no edges).
+
+How do we formally capture the fact that the shape has two holes?
+
+One way of capturing this notion is by constructing a **Vietoris-Rips complex**.
+
+Given a set of points S and a non-negative real number d,
+the [Vietoris Rips complex](https://en.wikipedia.org/wiki/Vietoris%E2%80%93Rips_complex) is the (abstract) simplicial complex C
+(on S) such that a simplex T lies in C if and only if all the vertices of T are atmost d distance apart.
+
+This means that an edge is in the complex if its length is atmost d, a triangle is in the complex
+if all its edges have length at most d, and so on.
+
+(TODO: Add example of Rips complex)
+
+Here is the Vietoris Rips complex for d = 0.3.
+<ExampleVietorisRipsSVG d={0.3}/>
+(I only show the dimension 0, 1 and 2 simplices since we only care about β<sub>1</sub>.)
+
+This simplicial complex captures the two holes in the shape, so we could calculate the homology of this complex
+to identify the holes.
+
+What happens for other values of d?
+
+<ExampleDifferentVietorisRips/>
+
+As you can see, as we increase d:
+- Initially neither hole is detected.
+- Then the right hole is detected.
+- Then the left hole is detected.
+- Then the left hole is lost.
+- Then the right hole is lost.
+
+Thus depending on the value of d, we may or may not detect the holes. How do we deal with this?
+
+Persistent homology deals with this by considering how the homology changes with d.
