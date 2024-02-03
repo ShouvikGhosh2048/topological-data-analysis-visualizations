@@ -2,7 +2,7 @@
 
 import { Dispatch, SetStateAction, useEffect, useRef, useState } from "react";
 import { Chart, Scatter, getElementAtEvent } from "react-chartjs-2";
-import { Chart as ChartJS, Legend, LineElement, LinearScale, PointElement, Tooltip } from "chart.js";
+import { CategoryScale, Chart as ChartJS, Legend, LineElement, LinearScale, PointElement, Tooltip } from "chart.js";
 
 function distance(a: [number, number], b: [number, number]) {
     return Math.sqrt((a[0] - b[0]) * (a[0] - b[0]) + (a[1] - b[1]) * (a[1] - b[1]));
@@ -709,7 +709,7 @@ export default function PersistentHomology() {
     const [view, setView] = useState<'editor' | 'viewer'>('editor');
 
     useEffect(() => {
-        ChartJS.register(LinearScale, PointElement, LineElement, Tooltip, Legend);
+        ChartJS.register(LinearScale, PointElement, LineElement, Tooltip, Legend, CategoryScale);
     }, []);
 
     if (view === 'editor') {
