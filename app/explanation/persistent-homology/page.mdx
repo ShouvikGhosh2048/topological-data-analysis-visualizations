@@ -1,0 +1,282 @@
+import {
+    ExamplePointsSVG,
+    ExampleVietorisRipsSVG,
+    ExampleDifferentVietorisRips,
+    ExampleFiltration,
+    ExampleFiltrationPersistentFunctionTree,
+    ExampleFiltrationPersistentHomology,
+    ExampleFilter,
+    ExamplePersistentAlgorithm,
+    ExamplePersistenceDiagram,
+} from './images.tsx';
+
+export const metadata = {
+    title: 'Persistent Homology'
+}
+
+# Persistent Homology
+
+Consider the following collection of points.
+
+<ExamplePointsSVG/>
+
+Intuitively these points represent a shape with two holes.
+However if we simply calculate β<sub>1</sub> for this simplicial complex,
+we get β<sub>1</sub> = 0 (as there are no edges).
+
+How do we formally capture the fact that the shape has two holes?
+
+One way of capturing this notion is by constructing a **Vietoris-Rips complex**.
+
+Given a set of points S and a non-negative real number d,
+the [Vietoris Rips complex](https://en.wikipedia.org/wiki/Vietoris%E2%80%93Rips_complex) is the (abstract) simplicial complex C
+(on S) such that a simplex T lies in C if and only if all the vertices of T are atmost d distance apart.
+
+This means that an edge is in the complex if its length is atmost d, a triangle is in the complex
+if all its edges have length at most d, and so on.
+
+Here is the Vietoris Rips complex for d = 0.3.
+<ExampleVietorisRipsSVG d={0.3}/>
+(Only the dimension 0, 1 and 2 simplices are shown since we only care about β<sub>1</sub>.)
+
+This simplicial complex captures the two holes in the shape, so we could calculate the homology of this complex
+to identify the holes.
+
+What happens for other values of d?
+
+<ExampleDifferentVietorisRips/>
+
+As you can see, as we increase d:
+- Initially neither hole is detected.
+- Then the right hole is detected.
+- Then the left hole is detected.
+- Then the left hole is lost.
+- Then the right hole is lost.
+
+Thus depending on the value of d, we may or may not detect the holes. How do we deal with this?
+
+Persistent homology deals with this by considering how the homology changes with d.
+
+## 1. Persistent Betti numbers
+### 1.1. Filtrations
+A filtration is a sequence of simplicial complexes F<sub>1</sub> ⊆ F<sub>2</sub> ⊆ ... ⊆ F<sub>n-1</sub> ⊆ F<sub>n</sub>.
+
+For example, the sequence of simplicial complexes shown above for different
+values of d form a filtration. 
+
+For this section we will be considering the following example:
+<ExampleFiltration/>
+
+For each complex we can consider it's H<sub>1</sub>:
+- F<sub>1</sub> - [0]
+- F<sub>2</sub> - [0], [e<sub>1</sub> + e<sub>2</sub> + e<sub>3</sub> + e<sub>4</sub>]
+- F<sub>3</sub> - [0], [e<sub>1</sub> + e<sub>2</sub> + e<sub>3</sub> + e<sub>4</sub>], [e<sub>1</sub> + e<sub>4</sub> + e<sub>5</sub>], [e<sub>2</sub> + e<sub>3</sub> + e<sub>5</sub>]
+- F<sub>4</sub> - [0], [e<sub>2</sub> + e<sub>3</sub> + e<sub>5</sub>]
+- F<sub>5</sub> - [0]
+
+Notice that for F<sub>3</sub> and F<sub>4</sub>, [e<sub>2</sub> + e<sub>3</sub> + e<sub>5</sub>] are different:
+- For F<sub>3</sub>, [e<sub>2</sub> + e<sub>3</sub> + e<sub>5</sub>] = \{e<sub>2</sub> + e<sub>3</sub> + e<sub>5</sub>\}
+- For F<sub>4</sub>, [e<sub>2</sub> + e<sub>3</sub> + e<sub>5</sub>] = \{e<sub>2</sub> + e<sub>3</sub> + e<sub>5</sub>, e<sub>1</sub> + e<sub>2</sub> + e<sub>3</sub> + e<sub>4</sub>\}
+
+Thus we use the notation [e<sub>2</sub> + e<sub>3</sub> + e<sub>5</sub>]<sup>3</sup> and [e<sub>2</sub> + e<sub>3</sub> + e<sub>5</sub>]<sup>4</sup> to
+differentiate between these cases - we place the complex index in the superscript.
+
+### 1.2. Inclusion maps
+For a general filtration F<sub>1</sub>, ... , F<sub>n</sub>, let F<sub>i</sub> and F<sub>j</sub> be two complexes (i ≤ j) and z be a cycle in F<sub>i</sub>.
+
+If there is a cycle z' which lies in the equivalence class [z]<sup>i</sup>, then z - z' is the boundary of some formal sum y in F<sub>i</sub>.
+
+Then as F<sub>i</sub> ⊆ F<sub>j</sub>, y is a formal sum in F<sub>j</sub> and z and z' are cycles in F<sub>j</sub>. Thus z - z' is a boundary of y in F<sub>j</sub>. Thus z' lies in the 
+equivalence class [z]<sup>j</sup> in F<sub>j</sub>.
+
+This implies [z]<sup>i</sup> ⊆ [z]<sup>j</sup>. This also means that for any z' ∈ [z]<sup>i</sup>, z' ∈ [z]<sup>j</sup>, and so [z']<sup>j</sup> = [z]<sup>j</sup>.
+
+Thus for any filtration, we can define the function f<sub>k</sub><sup>ij</sup>: H<sub>k</sub><sup>i</sup> → H<sub>k</sub><sup>j</sup> (superscripts represent complex index, subscripts represent dimension) which maps [z]<sup>i</sup> to [z]<sup>j</sup>.
+(This is well defined as for any z' ∈ [z]<sup>i</sup>, [z']<sup>j</sup> = [z]<sup>j</sup>, and so the choice of z doesn't matter.)
+
+We can visualize f<sub>1</sub><sup>i i+1</sup> for our example filtration by placing the classes of each complex in rows,
+and drawing arrows representing the function. (I represent a cycle of edges with their indices)
+
+(This visualization is based on this [video](https://youtu.be/l4vmErGufdY?feature=shared).)
+<ExampleFiltrationPersistentFunctionTree/>
+
+As you see above, this forms a tree. We can generalize this visualization to f<sub>k</sub><sup>i i+1</sup> for any filtration.
+
+### 1.3. Composition of inclusion maps
+Now for a filtration F<sub>1</sub>, ..., F<sub>n</sub>, consider some i < n - 1, and consider any [z]<sup>i</sup> ∈ H<sub>k</sub><sup>i</sup>.
+
+Then f<sub>k</sub><sup>i i+2</sup> ( [z]<sup>i</sup> ) = [z]<sup>i+2</sup>.
+
+And f<sub>k</sub><sup>i+1 i+2</sup> ( f<sub>k</sub><sup>i i+1</sup> ( [z]<sup>i</sup> ) ) = f<sub>k</sub><sup>i+1 i+2</sup> ( [z]<sup>i+1</sup> ) = [z]<sup>i+2</sup>.
+
+Thus f<sub>k</sub><sup>i i+2</sup> = f<sub>k</sub><sup>i+1 i+2</sup> ∘ f<sub>k</sub><sup>i i+1</sup>.
+As a result, f<sub>k</sub><sup>ac</sup> = f<sub>k</sub><sup>bc</sup> ∘ f<sub>k</sub><sup>ab</sup>.
+
+This means that in the above visualization, if I wanted to calculate what f<sub>1</sub><sup>24</sup>([1234]<sup>2</sup>) is,
+I can just follow the arrows from [1234]<sup>2</sup> in row F<sub>2</sub> to row F<sub>4</sub> to get [235]<sup>4</sup>.
+
+### 1.4. Persistent Betti numbers
+The **[persistent Betti number](https://en.wikipedia.org/wiki/Persistent_Betti_number) β<sub>k</sub><sup>ij</sup>**
+is the value dim(img(f<sub>k</sub><sup>ij</sup>)).
+
+Consider the equivalence classes of F<sub>2</sub> in our example. There are two - [0]<sup>2</sup> and [1234]<sup>2</sup>.
+If we follow the arrows from F<sub>2</sub> to F<sub>5</sub> and track where these equivalence classes map to,
+we get:
+<ExampleFiltrationPersistentHomology/>
+- F<sub>2</sub>: [0]<sup>2</sup>, [1234]<sup>2</sup>
+- F<sub>3</sub>: [0]<sup>3</sup>, [1234]<sup>3</sup>
+- F<sub>4</sub>: [0]<sup>4</sup>, [235]<sup>4</sup>
+- F<sub>5</sub>: [0]<sup>5</sup> (the two equivalence classes map to the same class)
+
+Thus the corresponding persistent Betti numbers are
+β<sub>1</sub><sup>23</sup> = 1, β<sub>1</sub><sup>24</sup> = 1 and β<sub>1</sub><sup>25</sup> = 0.
+
+In general if you consider the homology classes H<sub>k</sub><sup>i</sup> for F<sub>i</sub>, and follow them down the tree, the followed classes at each row form a vector space,
+and as we go down, the vector space's dimension either decreases or remains the same. The final dimension at row F<sub>j</sub>
+is the persistent Betti number β<sub>k</sub><sup>ij</sup>.
+
+## 2. Positive and negative simplices
+### 2.1. Sequences of simplices
+Given a filtration F<sub>1</sub>, ..., F<sub>n</sub>, we can order all the simplices:
+- We first order the simplices according to when they first appear.
+- Then within each group, we order the simplices such that if s is a face of t, s appears before t in the sequence.
+We call such a sequence an age filter.
+
+For example, we could order the simplices for our example as:
+
+v<sub>1</sub>, v<sub>2</sub>, v<sub>3</sub>, v<sub>4</sub>, e<sub>1</sub>,
+e<sub>2</sub>, e<sub>3</sub>, e<sub>4</sub>, e<sub>5</sub>, f<sub>1</sub>, f<sub>2</sub>
+
+(We could have other sequences too - for example swapping e<sub>1</sub> and v<sub>3</sub> is another possible sequence.)
+
+Now each prefix of this sequence forms a simplicial complex.
+We can visualize the sequence of simplicial complexes for increasing prefixes.
+
+<ExampleFilter/>
+
+We have certain simplices that either produce new connected components or new holes when they are added -
+like v<sub>1</sub> and e<sub>4</sub>.
+
+We can also observe that the other simplices either merge connected components or turn cycles into boundaries (thus killing holes)-
+like e<sub>1</sub> and f<sub>1</sub>.
+
+(Note: Whether a simplex is positive or negative depends on the sequence of simplices we choose.
+For a given filtration, different choices of simplex sequences can give different results.)
+
+### 2.2. Positive and negative simplices
+In general when we add a k-simplex s to a simplicial complex F, since
+- dim(C<sub>k</sub>) increases by 1 when we add s,
+- and by rank nullity on d<sub>k</sub>, dim(C<sub>k</sub>) = dim(B<sub>k-1</sub>) + dim(Z<sub>k</sub>),
+
+exactly one of dim(B<sub>k-1</sub>) and dim(Z<sub>k</sub>) increases by 1.
+
+(s is a k-simplex, so none of the other C<sub>i</sub> change, and so their corresponding kernel and image don't change.)
+
+- If dim(B<sub>k-1</sub>) increases by 1, dim(H<sub>k-1</sub>) falls by 1.
+- If dim(Z<sub>k</sub>) increases by 1, dim(H<sub>k</sub>) increases by 1.
+
+Thus on adding s, either a hole is created or a hole is killed (only one).
+
+Simplices which create a hole are called positive simplices.
+
+Simplices which kill a hole are called negative simplices.
+
+### 2.3. Positive simplices and their corresponding cycles
+A positive simplex s doesn't create any new boundaries when added. It creates new cycles.
+
+All the new cycles created on adding s will contain s as an element, since any cycle not containing s would have been present before. Thus every non-zero cycle has a positive simplex - the positive simplex that created it.
+
+We can show every positive simplex has a cycle where it's the only positive simplex.
+We do this by going through the simplex sequence:
+- The first time we encounter a positive k-simplex s, it creates a new cycle. Since all other k-simplices are negative,
+    s is the only positive simplex of the cycle.
+- When we encounter another positive k-simplex s, choose any cycle it creates. For every positive simplex s' except s in the cycle,
+    we add the cycle which has s' as the only positive simplex, thus cancelling all other positive simplices. Thus we get a cycle which has
+    s as the only positive simplex.
+
+Also if there are two cycles which have a positive simplex s as the only positive simplex, their difference is a non-zero cycle
+with no positive simplices, which can't happen. **Thus every positive simplex has exactly one corresponding cycle where it's the only positive simplex.**
+
+These cycles are linearly independent (since they differ in the positive simplex they contain).
+
+For any simplicial complex formed by a prefix of the simplex sequence,
+the cycles corresponding to the positive k-simplices in the complex form a basis of the k-cycles of the simplicial complex.
+
+### 2.4. Negative simplices and their corresponding positive simplices
+Negative simplices create new boundaries. They don't create new cycles.
+
+Now given the sequence of simplices, we perform the following algorithm to track the birth and death of holes.
+The algorithm will assign each negative simplex a positive simplex (this represents a death of a hole).
+
+Algorithm:
+
+Maintain lists of cycles for each dimension. These lists will track the alive holes at each step - 
+at the end of a step, the homology classes of the cycles in the lists will form bases of the homology groups 
+of the simplicial complex at the end of the step.
+
+Initially the lists are empty.
+
+Go through each simplex in the sequence.
+- If s is positive, choose the cycle containing s with no other positive simplices. We add this cycle to the lists. 
+This represents the new hole.
+- If s is a negative k-simplex, let F<sup>1</sup> and F<sup>2</sup> be the simplicial complexes before and after adding s.
+    - b = d<sub>k</sub>(s) is not a boundary in F<sup>1</sup> (if it was the boundary of a formal sum a, then s - a is a new cycle in F<sup>2</sup>,
+    contradicting the fact that negative simplices don't form new cycles). Thus b becomes a boundary when s is added,
+    (thus representing a hole that gets killed)
+    - Since the cycles in the lists represent bases of homology groups and [b]<sup>1</sup> ≠ [0]<sup>1</sup> (not a boundary),
+    [b]<sup>1</sup> can be written as a non zero sum [c<sub>1</sub>]<sup>1</sup> + ... + [c<sub>m</sub>]<sup>1</sup> for cycles c<sub>1</sub> , ... , c<sub>m</sub>
+    in the lists. Then c<sub>1</sub> + ... + c<sub>m</sub> becomes a boundary when s is added.
+    This will be the only non-zero linear combination of the cycles which becomes boundary, so we can identify the linear combination
+    by checking which linear combination becomes a boundary.
+    - For the cycles in the linear combination, consider their corresponding positive simplices, and choose the simplex which comes last in the simplex sequence.
+    We assign it to s and remove the cycle from the lists.
+
+Here is an example:
+
+<ExamplePersistentAlgorithm/>
+
+So the negative simplices get assigned:
+
+e<sub>1</sub> - v<sub>2</sub>, e<sub>2</sub> - v<sub>3</sub>, e<sub>3</sub> - v<sub>4</sub>
+
+f<sub>1</sub> - e<sub>5</sub>, f<sub>2</sub> - e<sub>4</sub>
+
+### 2.5. Relation with Persistent Betti Numbers
+We have the following important property (proven in [this paper](https://link.springer.com/article/10.1007/s00454-002-2885-2)):
+
+For any filtration F<sub>1</sub>, ..., F<sub>n</sub>, and any age filter of the filtration,
+
+β<sub>k</sub><sup>ij</sup> = Number of positive k simplices in F<sub>i</sub> which
+- either don't have negative simplex corresponding to it,
+- or the negative simplex corresponding to it doesn't lie in F<sub>j</sub>
+
+Then β<sub>k</sub><sup>ij-1</sup> - β<sub>k</sub><sup>ij</sup>
+= Number of positive k-simplices in F<sub>i</sub> with the corresponding negative simplex first appearing in F<sub>j</sub>.
+
+And thus c<sub>ij</sub> = (β<sub>k</sub><sup>ij-1</sup> - β<sub>k</sub><sup>ij</sup>) - (β<sub>k</sub><sup>i-1j-1</sup> - β<sub>k</sub><sup>i-1j</sup>)
+= Number of positive k-simplices first appearing in F<sub>i</sub> with the corresponding negative simplex first appearing in F<sub>j</sub>.
+
+Since this quantity depends on the persistent betti numbers, it is independent of the sequence of simplices.
+
+### 2.6. Persistence Diagram
+Generally the filtration F<sub>1</sub>, ..., F<sub>n</sub>, has a value t<sub>i</sub> associated with each F<sub>i</sub> - this t<sub>i</sub> generally represents a parameter which can varied,
+and F<sub>i</sub> is "born"/"formed" at t<sub>i</sub>.
+
+Then we can consider the multiset P obtained by taking the point (t<sub>i</sub>, t<sub>j</sub>) c<sub>ij</sub> number of times. Each (t<sub>i</sub>, t<sub>j</sub>)
+represents a positive simplex born at parameter value t<sub>i</sub> which is paired with a negative simplex born at t<sub>j</sub> (they represent a birth-death pair).
+
+This mutliset is known as the persistence diagram.
+
+## 2.7. Persistence Diagram for Vietoris Rips complexes
+Consider a set of points S. For S, we can consider Vietoris Rips complexes for different values of d.
+While there are infinitely many values, we will only have finitely many complexes.
+
+We take the sequence of these distinct complexes, and to each complex we assign the smallest value of d corresponding to it as it's birth time.
+We can consider the persistence diagram of this filtration.
+
+Since the persistence diagram is a set of pairs of values, we can visualize it on a graph.
+For the example at the beginning of the page, we get:
+
+<ExamplePersistenceDiagram/>
+
+The persistence diagram has 2 points corresponding to the two holes.
