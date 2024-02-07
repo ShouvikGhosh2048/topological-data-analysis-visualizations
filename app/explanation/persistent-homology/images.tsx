@@ -1,3 +1,8 @@
+import Image from 'next/image';
+import persistenceDiagramExample from './PersistenceDiagramExample.png';
+import persistenceDiagramExampleCycle1 from './PersistenceDiagramExampleCycle1.png';
+import persistenceDiagramExampleCycle2 from './PersistenceDiagramExampleCycle2.png';
+
 function examplePoints() {
     const radius1 = 0.3;
     const radius2 = 0.5;
@@ -80,7 +85,7 @@ export function ExampleVietorisRipsSVG({ d }: { d: number }) {
 }
 
 export function ExampleDifferentVietorisRips() {
-    const values = [0.0, 0.1, 0.2, 0.3, 0.4, 0.5, 0.6, 0.7, 0.8, 0.9, 1.0, 2.0];
+    const values = [0.0, 0.1, 0.2, 0.3, 0.4, 0.5, 0.6, 0.7, 0.8, 0.9];
     return (
         <div className="flex flex-wrap justify-around">
             {values.map(value => (
@@ -405,7 +410,7 @@ export function ExampleFilter() {
             {complexes.map(({numberOfVertices, numberOfEdges, numberOfFaces, text}, i) => (
                 <div key={i} className="flex items-center my-5 gap-5">
                     <div>
-                        <svg viewBox="0 0 300 300" width="150px" height="150px" className="border">
+                        <svg viewBox="0 0 300 300" width="150px" height="150px" className="border border-slate-900">
                             <SimplicalComplex vertices={vertices.slice(0, numberOfVertices)}
                                                 edges={edges.slice(0, numberOfEdges)}
                                                 triangles={triangles.slice(0, numberOfFaces)}/>
@@ -464,31 +469,31 @@ export function ExamplePersistentAlgorithm() {
             numberOfVertices: 0,
             numberOfEdges: 0,
             numberOfFaces: 0,
-            text: <>We start with no simplices. The lists are 0basis = [ ], 1basis = [ ].</>,
+            text: <>We start with no simplices. The lists are basis<sub>0</sub> = [ ], basis<sub>1</sub> = [ ].</>,
         },
         {
             numberOfVertices: 1,
             numberOfEdges: 0,
             numberOfFaces: 0,
-            text: <>We add v<sub>1</sub>. This is a positive simplex as vertices are cycles themselves. Thus we set 0basis = [ v<sub>1</sub> ].</>,
+            text: <>We add v<sub>1</sub>. This is a positive simplex as vertices are cycles themselves. Thus we set basis<sub>0</sub> = [ v<sub>1</sub> ].</>,
         },
         {
             numberOfVertices: 2,
             numberOfEdges: 0,
             numberOfFaces: 0,
-            text: <>We add v<sub>2</sub>. 0basis = [ v<sub>1</sub>, v<sub>2</sub> ].</>,
+            text: <>We add v<sub>2</sub>. basis<sub>0</sub> = [ v<sub>1</sub>, v<sub>2</sub> ].</>,
         },
         {
             numberOfVertices: 3,
             numberOfEdges: 0,
             numberOfFaces: 0,
-            text: <>We add v<sub>3</sub>. 0basis = [ v<sub>1</sub>, v<sub>2</sub>, v<sub>3</sub> ].</>,
+            text: <>We add v<sub>3</sub>. basis<sub>0</sub> = [ v<sub>1</sub>, v<sub>2</sub>, v<sub>3</sub> ].</>,
         },
         {
             numberOfVertices: 4,
             numberOfEdges: 0,
             numberOfFaces: 0,
-            text: <>We add v<sub>4</sub>. 0basis = [ v<sub>1</sub>, v<sub>2</sub>, v<sub>3</sub>, v<sub>4</sub> ].</>,
+            text: <>We add v<sub>4</sub>. basis<sub>0</sub> = [ v<sub>1</sub>, v<sub>2</sub>, v<sub>3</sub>, v<sub>4</sub> ].</>,
         },
         {
             numberOfVertices: 4,
@@ -500,13 +505,13 @@ export function ExamplePersistentAlgorithm() {
                     The boundary of e<sub>1</sub> = v<sub>1</sub> + v<sub>2</sub>.
                 </div>
                 <div>
-                    Since (v<sub>1</sub>) + (v<sub>2</sub>) becomes a boundary,
+                    Since v<sub>1</sub> + v<sub>2</sub> becomes a boundary,
                     and v<sub>1</sub> and v<sub>2</sub> are in the list,
                     we take their corresponding simplices v<sub>1</sub>, v<sub>2</sub> and
                     choose the one appearing last in the sequence, v<sub>2</sub>.
                 </div>
                 <div>
-                    Thus we assign v<sub>2</sub> to e<sub>1</sub>, and set 0basis = [ v<sub>1</sub>, v<sub>3</sub>, v<sub>4</sub> ].
+                    Thus we assign v<sub>2</sub> to e<sub>1</sub>, and set basis<sub>0</sub> = [ v<sub>1</sub>, v<sub>3</sub>, v<sub>4</sub> ].
                 </div>
             </>,
         },
@@ -520,13 +525,13 @@ export function ExamplePersistentAlgorithm() {
                     The boundary of e<sub>2</sub> = v<sub>2</sub> + v<sub>3</sub>.
                 </div>
                 <div>
-                    Since (v<sub>1</sub>) + (v<sub>3</sub>) becomes a boundary,
+                    Since v<sub>1</sub> + v<sub>3</sub> becomes a boundary,
                     and v<sub>1</sub> and v<sub>3</sub> are in the list,
                     we take their corresponding simplices v<sub>1</sub>, v<sub>3</sub> and
                     choose the one appearing last in the sequence, v<sub>3</sub>.
                 </div>
                 <div>
-                    Thus we assign v<sub>3</sub> to e<sub>2</sub>, and set 0basis = [ v<sub>1</sub>, v<sub>4</sub> ].
+                    Thus we assign v<sub>3</sub> to e<sub>2</sub>, and set basis<sub>0</sub> = [ v<sub>1</sub>, v<sub>4</sub> ].
                 </div>
             </>,
         },
@@ -540,13 +545,13 @@ export function ExamplePersistentAlgorithm() {
                 The boundary of e<sub>3</sub> = v<sub>3</sub> + v<sub>4</sub>.
             </div>
             <div>
-                    Since (v<sub>1</sub>) + (v<sub>4</sub>) becomes a boundary,
+                    Since v<sub>1</sub> + v<sub>4</sub> becomes a boundary,
                     and v<sub>1</sub> and v<sub>4</sub> are in the list,
                     we take their corresponding simplices v<sub>1</sub>, v<sub>4</sub> and
                     choose the one appearing last in the sequence, v<sub>4</sub>.
                 </div>
             <div>
-                Thus we assign v<sub>4</sub> to e<sub>3</sub>, and set 0basis = [ v<sub>1</sub> ].
+                Thus we assign v<sub>4</sub> to e<sub>3</sub>, and set basis<sub>0</sub> = [ v<sub>1</sub> ].
             </div>
         </>,
         },
@@ -555,7 +560,7 @@ export function ExamplePersistentAlgorithm() {
             numberOfEdges: 4,
             numberOfFaces: 0,
             text: <>
-                We add e<sub>4</sub>. This is a positive simplex. We set 1basis = [e<sub>1</sub> + e<sub>2</sub> + e<sub>3</sub> + e<sub>4</sub>].
+                We add e<sub>4</sub>. This is a positive simplex. We set basis<sub>1</sub> = [e<sub>1</sub> + e<sub>2</sub> + e<sub>3</sub> + e<sub>4</sub>].
             </>,
         },
         {
@@ -563,7 +568,7 @@ export function ExamplePersistentAlgorithm() {
             numberOfEdges: 5,
             numberOfFaces: 0,
             text: <>
-                We add e<sub>5</sub>. This is a positive simplex. We set 1basis = [e<sub>1</sub> + e<sub>2</sub> + e<sub>3</sub> + e<sub>4</sub>, e<sub>2</sub> + e<sub>3</sub> + e<sub>5</sub>].
+                We add e<sub>5</sub>. This is a positive simplex. We set basis<sub>1</sub> = [e<sub>1</sub> + e<sub>2</sub> + e<sub>3</sub> + e<sub>4</sub>, e<sub>2</sub> + e<sub>3</sub> + e<sub>5</sub>].
             </>,
         },
         {
@@ -576,14 +581,14 @@ export function ExamplePersistentAlgorithm() {
                     The boundary of f<sub>1</sub> = e<sub>1</sub> + e<sub>4</sub> + e<sub>5</sub>.
                 </div>
                 <div>
-                    Since (e<sub>1</sub> + e<sub>2</sub> + e<sub>3</sub> + e<sub>4</sub>)
+                    Since e<sub>1</sub> +  e<sub>4</sub> + e<sub>5</sub> = (e<sub>1</sub> + e<sub>2</sub> + e<sub>3</sub> + e<sub>4</sub>)
                     + (e<sub>2</sub> + e<sub>3</sub> + e<sub>5</sub>) becomes a boundary,
                     and e<sub>1</sub> + e<sub>2</sub> + e<sub>3</sub> + e<sub>4</sub> and e<sub>2</sub> + e<sub>3</sub> + e<sub>5</sub> are in the list,
-                    we take their corresponding simplices e<sub>4</sub> and v<sub>5</sub> and
+                    we take their corresponding simplices e<sub>4</sub> and e<sub>5</sub> and
                     choose the one appearing last in the sequence, e<sub>5</sub>.
                 </div>
                 <div>
-                    Thus we assign e<sub>5</sub> to f<sub>1</sub>, and set 1basis = [ e<sub>1</sub> + e<sub>2</sub> + e<sub>3</sub> + e<sub>4</sub>].
+                    Thus we assign e<sub>5</sub> to f<sub>1</sub>, and set basis<sub>1</sub> = [e<sub>1</sub> + e<sub>2</sub> + e<sub>3</sub> + e<sub>4</sub>].
                 </div>
             </>,
         },
@@ -597,23 +602,23 @@ export function ExamplePersistentAlgorithm() {
                     The boundary of f<sub>2</sub> = e<sub>2</sub> + e<sub>3</sub> + e<sub>5</sub>.
                 </div>
                 <div>
-                    Since (e<sub>1</sub> + e<sub>2</sub> + e<sub>3</sub> + e<sub>4</sub>) becomes a boundary,
+                    Since e<sub>1</sub> + e<sub>2</sub> + e<sub>3</sub> + e<sub>4</sub> becomes a boundary,
                     and e<sub>1</sub> + e<sub>2</sub> + e<sub>3</sub> + e<sub>4</sub> is in the list,
                     we take the corresponding simplex e<sub>4</sub>.
                 </div>
                 <div>
-                    Thus we assign e<sub>4</sub> to f<sub>2</sub>, and set 1basis = [ ].
+                    Thus we assign e<sub>4</sub> to f<sub>2</sub>, and set basis<sub>1</sub> = [ ].
                 </div>
             </>,
         },
     ];
 
     return (
-        <div className="gap-5">
+        <div className="space-y-12 mb-12">
             {complexes.map(({numberOfVertices, numberOfEdges, numberOfFaces, text}, i) => (
-                <div key={i} className="flex items-center my-5 gap-5">
+                <div key={i} className="flex flex-col gap-5 items-center my-5 sm:flex-row sm:gap-3">
                     <div>
-                        <svg viewBox="0 0 300 300" width="300px" height="300px" className="border">
+                        <svg viewBox="0 0 300 300" width="300px" height="300px" className="border border-slate-900">
                             <SimplicalComplex vertices={vertices.slice(0, numberOfVertices)}
                                                 edges={edges.slice(0, numberOfEdges)}
                                                 triangles={triangles.slice(0, numberOfFaces)}/>
@@ -622,9 +627,27 @@ export function ExamplePersistentAlgorithm() {
                             {faceLabels.slice(0, numberOfFaces)}
                         </svg>
                     </div>
-                    <span>{text}</span>
+                    <div className="space-y-3">{text}</div>
                 </div>
             ))}
+        </div>
+    );
+}
+
+export function ExamplePersistenceDiagram() {
+    return (
+        <div className="flex flex-col items-center gap-10">
+            <Image src={persistenceDiagramExample} alt="Persistence diagram" width="300" height="300"/>
+            <div className="flex flex-wrap items-center justify-center">
+                <div className="flex flex-col items-center w-fit">
+                    <Image src={persistenceDiagramExampleCycle1} alt="Persistence diagram cycle 1" width="300" height="300"/>
+                    <span>Top left point</span>
+                </div>
+                <div className="flex flex-col items-center w-fit">
+                    <Image src={persistenceDiagramExampleCycle2} alt="Persistence diagram cycle 2"  width="300" height="300"/>
+                    <span>Bottom right point</span>
+                </div>
+            </div>
         </div>
     );
 }

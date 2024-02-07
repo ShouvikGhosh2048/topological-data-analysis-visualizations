@@ -656,7 +656,7 @@ function PersistentHomologyViewer({ vertices, setView }: PersistentHomologyViewe
                                         y: death,
                                         i,
                                     })),
-                            backgroundColor: 'red',
+                            backgroundColor: '#0284c7',
                             label: 'Persistence'
                         }, {
                             data: [{ x: 0, y: 0, i: -1}, { x: diagonalEndpoint, y: diagonalEndpoint, i: -1}],
@@ -693,7 +693,7 @@ function PersistentHomologyViewer({ vertices, setView }: PersistentHomologyViewe
                         {selectedPersistence !== null && (
                             persistence[selectedPersistence].edges.map(([i, j], index) => 
                                 <line key={index} x1={vertices[i][0]} y1={vertices[i][1]}
-                                        x2={vertices[j][0]} y2={vertices[j][1]} stroke="red" strokeWidth="2"/>)
+                                        x2={vertices[j][0]} y2={vertices[j][1]} stroke="#0284c7" strokeWidth="2"/>)
                         )}
                         {vertices.map(([x, y], i) => <circle key={i} cx={x} cy={y} r="5"/>)}
                     </svg>
