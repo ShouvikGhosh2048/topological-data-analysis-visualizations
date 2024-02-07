@@ -21,9 +21,6 @@ export default function RootLayout({
         <nav className="p-2 bg-slate-900 text-white flex justify-between items-center h-10">
           <Link href="/">Home</Link>
           <div className="flex gap-5">
-            <Link href="https://discord.gg/pAYAEMR8pv" className="flex items-center">
-              <FaDiscord className="w-9 h-9"/>
-            </Link>
             <Link href="https://github.com/ShouvikGhosh2048/topological-data-analysis-visualizations" className="flex items-center">
               <FaGithub className="w-8 h-8"/>
             </Link>
