@@ -409,7 +409,7 @@ function HomologyViewer({ vertices, edges, triangles, setView }: HomologyViewerP
                 <div className="flex flex-wrap gap-2">
                     {vertices.map((vertex, i) => (
                         <svg viewBox={svgViewBox} key={i} width="300" height="300" className="border border-slate-500 rounded">
-                            <g opacity={0.5}>
+                            <g opacity={0.3}>
                                 {simplices}
                             </g>
                             <circle cx={vertex[0]} cy={vertex[1]} r={vertexRadius} />
@@ -423,7 +423,7 @@ function HomologyViewer({ vertices, edges, triangles, setView }: HomologyViewerP
                 <div className="flex flex-wrap gap-2">
                     {[...edgeBoundaryNonZeroColumnIndices].map(column => (
                         <svg viewBox={svgViewBox} key={column} width="300" height="300" className="border border-slate-500 rounded">
-                            <g opacity={0.5}>
+                            <g opacity={0.3}>
                                 {simplices}
                             </g>
                             {[...edgeBoundaryMatrix[column].entries].map(vertexIndex => (
@@ -439,7 +439,7 @@ function HomologyViewer({ vertices, edges, triangles, setView }: HomologyViewerP
                 <div className="flex flex-wrap gap-2">
                     {[...nonZeroH0Columns].map(column => (
                         <svg viewBox={svgViewBox} key={column} width="300" height="300" className="border border-slate-500 rounded">
-                            <g opacity={0.5}>
+                            <g opacity={0.3}>
                                 {simplices}
                             </g>
                             {[...BZ0[column].entries].map(vertexIndex => (
@@ -456,7 +456,7 @@ function HomologyViewer({ vertices, edges, triangles, setView }: HomologyViewerP
                 <div className="flex flex-wrap gap-2">
                     {edgeBoundaryZeroColumnIndices.map(column => (
                         <svg viewBox={svgViewBox} key={column} width="300" height="300" className="border border-slate-500 rounded">
-                            <g opacity={0.5}>
+                            <g opacity={0.3}>
                                 {simplices}
                             </g>
                             {[...edgeBoundaryMatrix[column].label].map(edgeIndex => (
@@ -475,7 +475,7 @@ function HomologyViewer({ vertices, edges, triangles, setView }: HomologyViewerP
                 <div className="flex flex-wrap gap-2">
                     {[...triangleBoundaryNonZeroColumnIndices].map(column => (
                         <svg viewBox={svgViewBox} key={column} width="300" height="300" className="border border-slate-500 rounded">
-                            <g opacity={0.5}>
+                            <g opacity={0.3}>
                                 {simplices}
                             </g>
                             {[...triangleBoundaryMatrix[column].entries].map(edgeIndex => (
@@ -494,7 +494,7 @@ function HomologyViewer({ vertices, edges, triangles, setView }: HomologyViewerP
                 <div className="flex flex-wrap gap-2">
                     {[...nonZeroH1Columns].map(column => (
                         <svg viewBox={svgViewBox} key={column} width="300" height="300" className="border border-slate-500 rounded">
-                            <g opacity={0.5}>
+                            <g opacity={0.3}>
                                 {simplices}
                             </g>
                             {[...BZ1[column].entries].map(edgeIndex => (

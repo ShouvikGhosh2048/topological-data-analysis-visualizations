@@ -90,7 +90,7 @@ function Editor({
                 ctx.fill();
             });
             if (selected && selected.type === 'vertex') {
-                ctx.fillStyle = '#fbbf24';
+                ctx.fillStyle = '#3b82f6';
                 ctx.beginPath();
                 ctx.arc(
                     canvasWidth/2 + vertices[selected.index][0],
@@ -164,7 +164,7 @@ function Editor({
             ctx.clearRect(0, 0, canvasWidth, canvasHeight);
 
             shapes.forEach((rect) => {
-                ctx.fillStyle = 'gray';
+                ctx.fillStyle = '#9ca3af';
                 ctx.fillRect(
                     canvasWidth/2 + Math.min(rect[0][0], rect[1][0]),
                     canvasHeight/2 + Math.min(rect[0][1], rect[1][1]),
@@ -173,7 +173,7 @@ function Editor({
             });
             if (selected && selected.type === 'shape') {
                 const rect = shapes[selected.index];
-                ctx.fillStyle = '#fbbf24';
+                ctx.fillStyle = '#3b82f6';
                 ctx.fillRect(
                     canvasWidth/2 + Math.min(rect[0][0], rect[1][0]),
                     canvasHeight/2 + Math.min(rect[0][1], rect[1][1]),

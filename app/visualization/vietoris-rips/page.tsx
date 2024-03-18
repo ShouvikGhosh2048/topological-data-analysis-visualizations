@@ -150,7 +150,7 @@ export default function VietorisRips() {
 
         if (selected !== null) {
             const selectedPoint = points[selected];
-            ctx.fillStyle = '#eab308';
+            ctx.fillStyle = '#3b82f6';
             ctx.beginPath();
             ctx.ellipse(selectedPoint[0], selectedPoint[1], 10, 10, 0, 0, Math.PI * 2);
             ctx.fill();
